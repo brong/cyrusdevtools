@@ -77,14 +77,14 @@ sievenotifier: mailto
 sieve_extensions: fileinto reject vacation imapflags notify envelope body relational regex subaddress copy
 sievedir: $basedir/conf/sieve
 configdirectory: $basedir/conf
-#syslog_prefix: test_${type}_$$
+syslog_prefix: test_${type}_$$
 guid_mode: sha1
 metapartition_files: header index cache expunge
 defaultpartition: default
 partition-default: $basedir/data
 metapartition-default: $basedir/meta
 mboxname_lockpath: $basedir/metalock
-#servername: test_${type}_$$
+servername: test_${type}_$$
 statuscache: on
 statuscache_db: skiplist
 sasl_pwcheck_method: saslauthd
@@ -110,6 +110,7 @@ __EOF
     print $cfh <<__EOF;
 START {
   recover       cmd="$cyrusbase/bin/ctl_cyrusdb -C $basedir/etc/imapd.conf -r"
+  idled         cmd="$cyrusbase/bin/idled -C $basedir/etc/imapd.conf"
 __EOF
     foreach my $other (@others) {
 	print $cfh <<__EOF;
@@ -121,6 +122,7 @@ __EOF
 
 SERVICES {
   imap          cmd="$cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:143"
+  imap          cmd="$cyrusbase/bin/debug_imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
   pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110"
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
   syncserver    cmd="$cyrusbase/bin/sync_server -C $basedir/etc/imapd.conf -p 1" listen="$ip{$type}:2005"

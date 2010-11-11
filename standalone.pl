@@ -75,14 +75,14 @@ sievenotifier: mailto
 sieve_extensions: fileinto reject vacation imapflags notify envelope body relational regex subaddress copy
 sievedir: $basedir/conf/sieve
 configdirectory: $basedir/conf
-#syslog_prefix: test_${type}_$$
+syslog_prefix: test_${type}_$$
 guid_mode: sha1
 metapartition_files: header index cache expunge
 defaultpartition: default
 partition-default: $basedir/data
 metapartition-default: $basedir/meta
 mboxname_lockpath: $basedir/metalock
-#servername: test_${type}_$$
+servername: test_${type}_$$
 statuscache: on
 statuscache_db: skiplist
 sasl_pwcheck_method: saslauthd
@@ -136,10 +136,8 @@ __EOF
       exit 0;
     }
     push @pids, ($masterpid, $saslpid);
-
-    sleep 2;
 }
-sleep 10;
+sleep 3;
 
 
 my $admin = Mail::IMAPTalk->new(
@@ -149,7 +147,9 @@ my $admin = Mail::IMAPTalk->new(
   Password => 'pass',
 );
 
+
 $admin->create('user.foo');
+$admin->setannotation("user.foo", "/vendor/cmu/cyrus-imapd/condstore", [ "value.shared", 'true' ]);
 $admin->create('user.foo.subdir');
 $admin->create('user.foo.Sent Items');
 $admin->create('user.foo.Drafts');

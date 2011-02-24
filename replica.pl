@@ -114,7 +114,7 @@ START {
 __EOF
     foreach my $other (@others) {
 	print $cfh <<__EOF;
-  sync_$other    cmd="/usr/bin/trickle -d 20 -u 20 -s $cyrusbase/bin/sync_client -C $basedir/etc/imapd.conf -n $other -r -v"
+  sync_$other    cmd="$cyrusbase/bin/sync_client -C $basedir/etc/imapd.conf -n $other -r -v"
 __EOF
     }
     print $cfh <<__EOF;

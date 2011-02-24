@@ -60,6 +60,7 @@ foreach my $type (sort keys %ip) {
     my $ifh = IO::File->new(">$basedir/etc/imapd.conf");
     print $ifh <<__EOF;
 admins: admin repluser
+altnamespace: yes
 allowplaintext: yes
 allowusermoves: yes
 annotation_db: skiplist
@@ -82,9 +83,11 @@ defaultpartition: default
 partition-default: $basedir/data
 metapartition-default: $basedir/meta
 mboxname_lockpath: $basedir/metalock
+quota_db: skiplist
 servername: test_${type}_$$
 statuscache: on
 statuscache_db: skiplist
+#suppress_capabilities: QRESYNC SEARCH SORT
 sasl_pwcheck_method: saslauthd
 sasl_mech_list: PLAIN LOGIN DIGEST-MD5
 sasl_saslauthd_path: $basedir/run/mux
@@ -92,6 +95,13 @@ xlist-drafts: Drafts
 xlist-sent: Sent Items
 xlist-trash: Trash
 xlist-spam: Junk Mail
+unixhierarchysep: 1
+lmtp_downcase_rcpt: 1
+popuseacl: 1
+allowapop: 0
+imapidresponse: 0
+mailnotifier: log
+username_tolower: 1
 __EOF
     $ifh->close();
 
@@ -105,6 +115,7 @@ __EOF
 
 SERVICES {
   imap          cmd="$cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:143"
+  imapdebug     cmd="$cyrusbase/bin/debug_imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
   pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110"
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
 }
@@ -148,18 +159,21 @@ my $admin = Mail::IMAPTalk->new(
 );
 
 
-$admin->create('user.foo');
-$admin->setannotation("user.foo", "/vendor/cmu/cyrus-imapd/condstore", [ "value.shared", 'true' ]);
-$admin->create('user.foo.subdir');
-$admin->create('user.foo.Sent Items');
-$admin->create('user.foo.Drafts');
-$admin->create('user.foo.Trash');
-$admin->create('user.bar');
-$admin->setacl('user.bar', 'foo', "lrswipcd");
-$admin->setacl('user.foo', 'admin', "lrswipcd");
+$admin->create('user/foo');
+$admin->setannotation("user/foo", "/vendor/cmu/cyrus-imapd/condstore", [ "value.shared", 'true' ]);
+$admin->create('user/foo/subdir');
+$admin->create('user/foo/Sent Items');
+$admin->create('user/foo/Drafts');
+$admin->create('user/foo/Trash');
+$admin->create('user/bar');
+$admin->setacl('user/bar', 'foo', "lrswipcd");
+$admin->setacl('user/foo', 'admin', "lrswipcd");
+$admin->setquota('user/foo', "(STORAGE 100000)");
+$admin->create('random');
+$admin->setacl('random', 'foo', "lrswipcd");
 
 sleep 2;
-$admin->setacl('user.foo', 'hello', "lrswipcd");
+$admin->setacl('user/foo', 'hello', "lrswipcd");
 
 my $msg = <<EOF;
 From: test <test\@example.com>
@@ -169,7 +183,14 @@ Some stuff in the body...
 EOF
 $msg =~ s/\012/\r\n/gs;
 $msg .= ".\r\n";
-$admin->append('user.foo', "(\\Seen \\Flagged)", "08-Mar-2010 16:18:11 +1000", $msg);
+$admin->append('user/foo', "(\\Seen \\Flagged)", "08-Mar-2010 16:18:11 +1000", $msg);
+if (open(FH, "<8440-1290290440-1")) {
+  local $/ = undef;
+  my $slurp = <FH>;
+  print "APPENDING SLURP FILE\n";
+  $admin->append('user/foo', "(\\Seen \\Flagged)", "08-Mar-2010 16:18:11 +1000", $slurp);
+  close(FH);
+}
 print "created\n";
 # let's see about dupelim then...
 dolmtp('foo', $msg);

@@ -47,10 +47,14 @@ my %ip = (
 my %version = (
     mmaster => 'cyrus',
     mfrontend1 => 'cyrus',
-    mfrontend2 => 'cyrus22',
+    mfrontend2 => 'cyrus',
+    mfrontend3 => 'cyrus',
+    #mfrontend2 => 'cyrus22',
     mfrontend3 => 'cyrus23',
     mbackend1 => 'cyrus',
-    mbackend2 => 'cyrus22',
+    mbackend2 => 'cyrus',
+    mbackend3 => 'cyrus',
+    #mbackend2 => 'cyrus22',
     mbackend3 => 'cyrus23',
 );
 
@@ -128,6 +132,7 @@ tls_cipher_list: TLSv1 :SSLv3 :SSLv2 : !DES : !LOW :\@STRENGTH
 tls_ca_file: $rootdir/server.pem
 tls_cert_file: $rootdir/server.pem
 tls_key_file: $rootdir/server.pem
+unixhierarchysep: on
 xlist-drafts: Drafts
 xlist-sent: Sent Items
 xlist-trash: Trash
@@ -216,6 +221,7 @@ __EOF
     my $saslpid = fork();
     unless ($saslpid) {
       # child;
+      $0 = "saslauthd: $basedir";
       saslauthd("$basedir/run");
       exit 0;
     }
@@ -224,6 +230,7 @@ __EOF
 
     my $masterpid = fork();
     unless ($masterpid) {
+      $0 = "cyrusmaster: $basedir";
       chdir("$basedir/conf/cores");
       if (-f "/proc/sys/kernel/core_uses_pid") {
 	system("echo 1 >/proc/sys/kernel/core_uses_pid");
@@ -251,15 +258,18 @@ my $admin2 = Mail::IMAPTalk->new(
   Password => 'test',
 );
 
-$admin->create('user.foo', 'default');
-$admin->create('user.foo.subdir', 'default');
-$admin->create('user.foo.Sent Items', 'default');
-$admin->create('user.foo.Drafts', 'default');
-$admin->create('user.foo.Trash', 'default');
-$admin->setacl('user.foo', 'admin', "lrswipcd");
+$admin->create('user/foo', 'default');
+$admin->create('user/foo/subdir', 'default');
+$admin->create('user/foo/Sent Items', 'default');
+$admin->create('user/foo/Drafts', 'default');
+$admin->create('user/foo/Trash', 'default');
+$admin->setacl('user/foo', 'admin', "lrswipcd");
+$admin->setquota('user/foo', "(STORAGE 100000)");
 
-$admin2->create('user.bar', 'default');
-$admin2->setacl('user.bar', 'foo', "lrswipcd");
+$admin2->create('user/user.name@domain.com', 'default');
+$admin2->create('user/user.name/Drafts@domain.com', 'default');
+$admin2->setacl('user/user.name@domain.com', 'foo', "lrswipcd");
+$admin2->setquota('user/user.name@domain.com', "(STORAGE 100000)");
 
 my $msg = <<EOF;
 From: test <test\@example.com>

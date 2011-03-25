@@ -66,6 +66,7 @@ allowplaintext: yes
 allowusermoves: yes
 annotation_db: skiplist
 auditlog: yes
+conversations: yes
 duplicate_db: skiplist
 mboxlist_db: skiplist
 seenstate_db: skiplist
@@ -122,7 +123,7 @@ __EOF
 
 SERVICES {
   imap          cmd="$cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:143"
-  imap          cmd="$cyrusbase/bin/debug_imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
+  #imap          cmd="$cyrusbase/bin/debug_imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
   pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110"
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
   syncserver    cmd="$cyrusbase/bin/sync_server -C $basedir/etc/imapd.conf -p 1" listen="$ip{$type}:2005"

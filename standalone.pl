@@ -60,11 +60,12 @@ foreach my $type (sort keys %ip) {
     my $ifh = IO::File->new(">$basedir/etc/imapd.conf");
     print $ifh <<__EOF;
 admins: admin repluser
-altnamespace: yes
+altnamespace: no
 allowplaintext: yes
 allowusermoves: yes
 annotation_db: skiplist
 auditlog: yes
+conversations: yes
 duplicate_db: skiplist
 mboxlist_db: skiplist
 seenstate_db: skiplist
@@ -115,7 +116,7 @@ __EOF
 
 SERVICES {
   imap          cmd="$cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:143"
-  imapdebug     cmd="$cyrusbase/bin/debug_imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
+  #imapdebug     cmd="$cyrusbase/bin/debug_imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
   pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110"
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
 }
@@ -211,6 +212,7 @@ sub saslauthd {
     Listen => SOMAXCONN,
   );
   die "FAILED to create socket $!" unless $sock;
+  system("chmod 777 $dir/mux");
 
   while (my $client = $sock->accept()) {
     my $LoginName = get_counted_string($client);

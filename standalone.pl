@@ -80,11 +80,11 @@ sievedir: $basedir/conf/sieve
 configdirectory: $basedir/conf
 syslog_prefix: test_${type}_$$
 guid_mode: sha1
-metapartition_files: header index cache expunge
+#metapartition_files: header index cache expunge
 defaultpartition: default
 postuser: postuser
 partition-default: $basedir/data
-metapartition-default: $basedir/meta
+#metapartition-default: $basedir/meta
 mboxname_lockpath: $basedir/metalock
 #quota_db: skiplist
 quota_db: quotalegacy
@@ -108,6 +108,7 @@ allowapop: 0
 imapidresponse: 0
 mailnotifier: log
 username_tolower: 1
+proc_path: /tmp/procpath
 __EOF
     $ifh->close();
 
@@ -139,6 +140,7 @@ __EOF
     my $saslpid = fork();
     unless ($saslpid) {
       # child;
+      $0 = "saslperld: $basedir";
       saslauthd("$basedir/run");
       exit 0;
     }

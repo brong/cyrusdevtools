@@ -147,7 +147,7 @@ defaultpartition: default
 partition-default: $basedir/data
 metapartition-default: $basedir/meta
 mupdate_config: standard
-mupdate_server: mmaster
+mupdate_server: $ip{mmaster}
 mupdate_username: admin
 mupdate_authname: test
 mupdate_realm: test
@@ -163,7 +163,7 @@ __EOF
     if ($type =~ m/^mfrontend/) {
 	print $ifh <<__EOF;
 defaultserver: mbackend1
-mupdate_server: mmaster
+mupdate_server: $ip{mmaster}
 mupdate_username: admin
 mupdate_authname: test
 mupdate_realm: test

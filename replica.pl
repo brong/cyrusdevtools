@@ -5,6 +5,7 @@ use warnings;
 use IO::File;
 use IO::Socket::UNIX;
 use Mail::IMAPTalk;
+use Cyrus::SIEVE::managesieve;
 
 my $del = shift;
 my $rootdir = shift || "/tmp/ct";
@@ -127,6 +128,7 @@ SERVICES {
   pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110"
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
   syncserver    cmd="$cyrusbase/bin/sync_server -C $basedir/etc/imapd.conf -p 1" listen="$ip{$type}:2005"
+  sieve         cmd="$cyrusbase/bin/timsieved -C $basedir/etc/imapd.conf" listen="listen="$ip{$type}:2000"
 }
 
 EVENTS {
@@ -210,6 +212,7 @@ sub saslauthd {
     Listen => SOMAXCONN,
   );
   die "FAILED to create socket $!" unless $sock;
+  system("chmod 777 $dir/mux");
 
   while (my $client = $sock->accept()) {
     my $LoginName = get_counted_string($client);
@@ -259,6 +262,44 @@ sub dolmtp {
 
   slurpto($sock);
   print $sock "QUIT\r\n";
+}
+
+sub prompt {
+  my ($type, $prompt) = @_;
+
+  if ($type eq "username") {
+    return 'foo';
+  }
+  elsif ($type eq "authname")
+    return 'foo';
+  }
+  elsif ($type eq "password")
+    return 'foo';
+  }
+  elsif ($type eq "realm") {
+    return '';
+  }
+}
+
+sub dosieve {
+  my $ServerName = shift;
+  my $LocalFile = shift;
+  my $obj = sieve_get_handle($ServerName, "prompt", "prompt", "prompt", "prompt");
+  my $ret = sieve_put_file_withdest($obj, $LocalFile, 'testscript');
+  if ( $ret != 0 ) {
+    my $errstr = sieve_get_error($obj);
+    $errstr = "unknown error" if ( !defined($errstr) );
+    warn "upload failed: $errstr\n";
+    print "upload failed: $errstr\n";
+  }
+  $ret = sieve_activate($obj, 'testscript');
+  if ( $ret != 0 ) {
+    my $errstr = sieve_get_error($obj);
+    $errstr = "unknown error" if ( !defined($errstr) );
+    warn "activate failed: $errstr\n";
+    print "activate failed: $errstr\n";
+  }
+  sieve_logout($obj);
 }
 
 sub slurpto {

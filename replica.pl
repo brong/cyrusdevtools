@@ -128,7 +128,7 @@ SERVICES {
   pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110"
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
   syncserver    cmd="$cyrusbase/bin/sync_server -C $basedir/etc/imapd.conf -p 1" listen="$ip{$type}:2005"
-  sieve         cmd="$cyrusbase/bin/timsieved -C $basedir/etc/imapd.conf" listen="listen="$ip{$type}:2000"
+  sieve         cmd="$cyrusbase/bin/timsieved -C $basedir/etc/imapd.conf" listen="$ip{$type}:2000"
 }
 
 EVENTS {
@@ -183,18 +183,35 @@ $admin->setacl('user.foo', 'admin', "lrswipcd");
 sleep 2;
 $admin->setacl('user.foo', 'hello', "lrswipcd");
 
-my $msg = <<EOF;
+my $msg = <<__EOF;
 From: test <test\@example.com>
 To: test <test\@example.com>
 
 Some stuff in the body...
-EOF
+__EOF
 $msg =~ s/\012/\r\n/gs;
 $msg .= ".\r\n";
 $admin->append('user.foo', "(\\Seen \\Flagged)", "08-Mar-2010 16:18:11 +1000", $msg);
 print "created\n";
 # let's see about dupelim then...
 dolmtp('foo', $msg);
+my $filename = "/tmp/sieve.$$";
+open(FH, ">$filename");
+print FH <<__EOF;
+require ["envelope", "imapflags", "fileinto", "reject", "notify", "vacation", "regex", "relational", "comparator-i;ascii-numeric", "body", "copy"];
+
+if not header :contains ["X-Spam-known-sender"] "yes" {
+if allof(
+  header :contains ["X-Backscatter"] "yes",
+  not header :matches ["X-LinkName"] "*" 
+) {
+  fileinto "INBOX.Junk Mail";
+  stop;
+}
+}
+__EOF
+close(FH);
+dosieve($filename);
 
 # XXX - fun here
 
@@ -270,10 +287,10 @@ sub prompt {
   if ($type eq "username") {
     return 'foo';
   }
-  elsif ($type eq "authname")
+  elsif ($type eq "authname") {
     return 'foo';
   }
-  elsif ($type eq "password")
+  elsif ($type eq "password") {
     return 'foo';
   }
   elsif ($type eq "realm") {
@@ -282,9 +299,8 @@ sub prompt {
 }
 
 sub dosieve {
-  my $ServerName = shift;
   my $LocalFile = shift;
-  my $obj = sieve_get_handle($ServerName, "prompt", "prompt", "prompt", "prompt");
+  my $obj = sieve_get_handle("$ip{slot2}:2000", "prompt", "prompt", "prompt", "prompt");
   my $ret = sieve_put_file_withdest($obj, $LocalFile, 'testscript');
   if ( $ret != 0 ) {
     my $errstr = sieve_get_error($obj);

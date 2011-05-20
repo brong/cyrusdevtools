@@ -60,7 +60,7 @@ foreach my $type (sort keys %ip) {
     my $ifh = IO::File->new(">$basedir/etc/imapd.conf");
     print $ifh <<__EOF;
 admins: admin repluser
-altnamespace: no
+altnamespace: yes
 allowplaintext: yes
 allowusermoves: yes
 annotation_db: skiplist
@@ -70,7 +70,7 @@ duplicate_db: skiplist
 mboxlist_db: skiplist
 seenstate_db: skiplist
 expunge_mode: delayed
-delete_mode: delayed
+#delete_mode: delayed
 internaldate_heuristic: receivedheader
 rfc3028_strict: 0
 sievenotifier: mailto

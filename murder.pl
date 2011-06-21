@@ -45,17 +45,17 @@ my %ip = (
 );
 
 my %version = (
-    mmaster => 'cyrus',
-    mfrontend1 => 'cyrus',
-    mfrontend2 => 'cyrus',
-    mfrontend3 => 'cyrus',
+    mmaster => 'cyrus24',
+    mfrontend1 => 'cyrus24',
+    mfrontend2 => 'cyrus24',
+    mfrontend3 => 'cyrus24',
     #mfrontend2 => 'cyrus22',
-    mfrontend3 => 'cyrus23',
-    mbackend1 => 'cyrus',
-    mbackend2 => 'cyrus',
-    mbackend3 => 'cyrus',
+    #mfrontend3 => 'cyrus23',
+    mbackend1 => 'cyrus24',
+    mbackend2 => 'cyrus24',
+    mbackend3 => 'cyrus24',
     #mbackend2 => 'cyrus22',
-    mbackend3 => 'cyrus23',
+    #mbackend3 => 'cyrus23',
 );
 
 my @order = qw(mmaster
@@ -116,10 +116,6 @@ sievedir: $basedir/conf/sieve
 configdirectory: $basedir/conf
 syslog_prefix: test_${type}_$$
 guid_mode: sha1
-metapartition_files: header index cache expunge
-defaultpartition: default
-partition-default: $basedir/data
-metapartition-default: $basedir/meta
 mboxname_lockpath: $basedir/metalock
 servername: $type
 statuscache: on
@@ -146,6 +142,10 @@ __EOF
     }
     if ($type =~ m/^mbackend/) {
 	print $ifh <<__EOF;
+metapartition_files: header index cache expunge
+defaultpartition: default
+partition-default: $basedir/data
+metapartition-default: $basedir/meta
 mupdate_config: standard
 mupdate_server: mmaster
 mupdate_username: admin
@@ -157,6 +157,7 @@ mbackend2_password: test
 mbackend3_password: test
 proxy_authname: test
 proxy_realm:    test
+proxyservers:   test
 __EOF
     }
     if ($type =~ m/^mfrontend/) {

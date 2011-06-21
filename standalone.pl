@@ -61,6 +61,7 @@ foreach my $type (sort keys %ip) {
     print $ifh <<__EOF;
 admins: admin repluser
 altnamespace: yes
+lmtplocal_altnamespace: no
 allowplaintext: yes
 allowusermoves: yes
 annotation_db: skiplist
@@ -81,10 +82,12 @@ syslog_prefix: test_${type}_$$
 guid_mode: sha1
 metapartition_files: header index cache expunge
 defaultpartition: default
+postuser: postuser
 partition-default: $basedir/data
 metapartition-default: $basedir/meta
 mboxname_lockpath: $basedir/metalock
-quota_db: skiplist
+#quota_db: skiplist
+quota_db: quotalegacy
 servername: test_${type}_$$
 statuscache: on
 statuscache_db: skiplist
@@ -96,7 +99,9 @@ xlist-drafts: Drafts
 xlist-sent: Sent Items
 xlist-trash: Trash
 xlist-spam: Junk Mail
-unixhierarchysep: 1
+virtdomains: userid
+unixhierarchysep: yes
+lmtplocal_unixhierarchysep: no
 lmtp_downcase_rcpt: 1
 popuseacl: 1
 allowapop: 0
@@ -119,6 +124,8 @@ SERVICES {
   #imapdebug     cmd="$cyrusbase/bin/debug_imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
   pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110"
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
+  lmtplocal     cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf" listen="$basedir/conf/socket/lmtp"
+  fud           cmd="$cyrusbase/bin/fud -C $basedir/etc/imapd.conf" listen="$ip{$type}:4201" proto="udp"
 }
 
 EVENTS {
@@ -169,6 +176,8 @@ $admin->create('user/foo/Trash');
 $admin->create('user/bar');
 $admin->setacl('user/bar', 'foo', "lrswipcd");
 $admin->setacl('user/foo', 'admin', "lrswipcd");
+$admin->setacl('user/foo', 'anyone', "0");
+$admin->setacl('user/foo/subdir', 'anyone', "p");
 $admin->setquota('user/foo', "(STORAGE 100000)");
 $admin->create('random');
 $admin->setacl('random', 'foo', "lrswipcd");

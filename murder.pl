@@ -45,15 +45,15 @@ my %ip = (
 );
 
 my %version = (
-    mmaster => 'cyrus24',
-    mfrontend1 => 'cyrus24',
-    mfrontend2 => 'cyrus24',
-    mfrontend3 => 'cyrus24',
+    #mmaster => 'cyrus24',
+    #mfrontend1 => 'cyrus24',
+    #mfrontend2 => 'cyrus24',
+    #mfrontend3 => 'cyrus24',
     #mfrontend2 => 'cyrus22',
     #mfrontend3 => 'cyrus23',
-    mbackend1 => 'cyrus24',
-    mbackend2 => 'cyrus24',
-    mbackend3 => 'cyrus24',
+    #mbackend1 => 'cyrus24',
+    #mbackend2 => 'cyrus24',
+    #mbackend3 => 'cyrus24',
     #mbackend2 => 'cyrus22',
     #mbackend3 => 'cyrus23',
 );
@@ -61,6 +61,9 @@ my %version = (
 my @order = qw(mmaster
 	       mbackend1 mbackend2 mbackend3 
 	       mfrontend1 mfrontend2 mfrontend3);
+foreach my $item (@order) {
+    $version{$item} ||= 'cyrus';
+}
 
 mkdir($rootdir);
 system("openssl req -batch -new -nodes -out $rootdir/server.csr -keyout $rootdir/server.key");

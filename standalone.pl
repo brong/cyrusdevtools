@@ -5,10 +5,18 @@ use warnings;
 use IO::File;
 use IO::Socket::UNIX;
 use Mail::IMAPTalk;
+use Getopt::Std;
 
-my $del = shift;
-my $rootdir = shift || "/tmp/ct";
-my $cyrusbase = shift || "/usr/cyrus";
+my %Opts;
+
+getopts('Dr:c:ua', \%Opts);
+
+
+my $unixhs = $Opts{u} ? 'yes' : 'no';
+my $altns = $Opts{a} ? 'yes' : 'no';
+my $del = $Opts{D};
+my $rootdir = $Opts{r} || "/tmp/ct";
+my $cyrusbase = $Opts{c} || "/usr/cyrus";
 
 my @pids;
 my @tokill;
@@ -60,8 +68,7 @@ foreach my $type (sort keys %ip) {
     my $ifh = IO::File->new(">$basedir/etc/imapd.conf");
     print $ifh <<__EOF;
 admins: admin repluser
-altnamespace: yes
-lmtplocal_altnamespace: no
+altnamespace: $altns
 allowplaintext: yes
 allowusermoves: yes
 annotation_db: skiplist
@@ -86,7 +93,6 @@ postuser: postuser
 partition-default: $basedir/data
 #metapartition-default: $basedir/meta
 mboxname_lockpath: $basedir/metalock
-#quota_db: skiplist
 quota_db: quotalegacy
 servername: test_${type}_$$
 statuscache: on
@@ -100,8 +106,7 @@ xlist-sent: Sent Items
 xlist-trash: Trash
 xlist-spam: Junk Mail
 virtdomains: userid
-unixhierarchysep: yes
-lmtplocal_unixhierarchysep: no
+unixhierarchysep: $unixhs
 lmtp_downcase_rcpt: 1
 popuseacl: 1
 allowapop: 0
@@ -169,23 +174,20 @@ my $admin = Mail::IMAPTalk->new(
 );
 
 
-$admin->create('user/foo');
-$admin->setannotation("user/foo", "/vendor/cmu/cyrus-imapd/condstore", [ "value.shared", 'true' ]);
-$admin->create('user/foo/subdir');
-$admin->create('user/foo/Sent Items');
-$admin->create('user/foo/Drafts');
-$admin->create('user/foo/Trash');
-$admin->create('user/bar');
-$admin->setacl('user/bar', 'foo', "lrswipcd");
-$admin->setacl('user/foo', 'admin', "lrswipcd");
-$admin->setacl('user/foo', 'anyone', "0");
-$admin->setacl('user/foo/subdir', 'anyone', "p");
-$admin->setquota('user/foo', "(STORAGE 100000)");
-$admin->create('random');
-$admin->setacl('random', 'foo', "lrswipcd");
+$admin->create(_f('user/foo'));
+$admin->create(_f('user/foo/subdir'));
+$admin->create(_f('user/foo/Sent Items'));
+$admin->create(_f('user/foo/Drafts'));
+$admin->create(_f('user/foo/Trash'));
+$admin->create(_f('user/bar'));
+$admin->setacl(_f('user/bar'), 'foo', "lrswipcd");
+$admin->setacl(_f('user/foo'), 'admin', "lrswipcd");
+$admin->setquota(_f('user/foo'), "(STORAGE 100000)");
+$admin->create(_f('random'));
+$admin->setacl(_f('random'), 'foo', "lrswipcd");
 
 sleep 2;
-$admin->setacl('user/foo', 'hello', "lrswipcd");
+$admin->setacl(_f('user/foo'), 'hello', "lrswipcd");
 
 my $msg = <<EOF;
 From: test <test\@example.com>
@@ -195,12 +197,12 @@ Some stuff in the body...
 EOF
 $msg =~ s/\012/\r\n/gs;
 $msg .= ".\r\n";
-$admin->append('user/foo', "(\\Seen \\Flagged)", "08-Mar-2010 16:18:11 +1000", $msg);
+$admin->append(_f('user/foo'), "(\\Seen \\Flagged)", "08-Mar-2010 16:18:11 +1000", $msg);
 if (open(FH, "<8440-1290290440-1")) {
   local $/ = undef;
   my $slurp = <FH>;
   print "APPENDING SLURP FILE\n";
-  $admin->append('user/foo', "(\\Seen \\Flagged)", "08-Mar-2010 16:18:11 +1000", $slurp);
+  $admin->append(_f('user/foo'), "(\\Seen \\Flagged)", "08-Mar-2010 16:18:11 +1000", $slurp);
   close(FH);
 }
 print "created\n";
@@ -280,5 +282,16 @@ sub slurpto {
   while (my $line = <$sock>) {
     print $line;
     last if $line =~ m/^\d\d\d /;
+  }
+}
+
+sub _f {
+  my $f = shift;
+  my @bits = split '/', $f;
+  if ($unixhs eq 'yes') {
+    return join '/', @bits;
+  }
+  else {
+    return join '.', @bits;
   }
 }

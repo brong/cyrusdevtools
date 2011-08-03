@@ -74,6 +74,7 @@ allowusermoves: yes
 annotation_db: skiplist
 auditlog: yes
 conversations: yes
+conversations_counted_flags: \\Draft \\Flagged \$SomethingElse
 duplicate_db: skiplist
 mboxlist_db: skiplist
 seenstate_db: skiplist

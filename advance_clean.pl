@@ -12,7 +12,8 @@ unless (@revs) {
 
 foreach my $rev (reverse @revs) {
   $REV = $rev;
-  system('git', 'checkout', $rev);
+  run_command("git checkout $rev");
+  print "ON $rev\n";
   my $res;
   my @items;
   check_start('configure');
@@ -32,7 +33,7 @@ foreach my $rev (reverse @revs) {
   $res = 1 if grep { m/FAILED/ } @items;
   check_res($res, @items);
 
-  system('git checkout -B clean');
+  run_command('git checkout -B clean');
 }
 
 sub git_revlist {
@@ -50,7 +51,6 @@ sub git_revlist {
 sub run_command {
   my $command = shift;
   my @items;
-  print "$command ";
   open(FH, "$command 2>&1 | tee /tmp/$REV-$SECTION.out |") || die "Failed to run $command";
   @items = <FH>;
   close(FH);
@@ -60,7 +60,7 @@ sub run_command {
 sub check_start {
   my $section = shift;
   $| = 1;
-  print "$section: ";
+  print "  $section: ";
   $SECTION = $section;
 }
 

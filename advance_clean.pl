@@ -12,11 +12,10 @@ unless (@revs) {
 
 foreach my $rev (reverse @revs) {
   $REV = $rev;
-  run_command("git checkout $rev");
-  print "ON $rev\n";
-  my $res;
-  my @items;
-  check_start('configure');
+  check_start("git $rev");
+  my ($res, @items) = run_command("git checkout $rev");
+  check_res($res, @items);
+  check_start(' configure');
   run_command('make clean');
   run_command('aclocal -I cmulocal');
   run_command('autoheader');
@@ -25,10 +24,10 @@ foreach my $rev (reverse @revs) {
                                '--enable-unit-tests --enable-replication ' .
                                '--enable-nntp --enable-murder --enable-idled');
   check_res($res, @items);
-  check_start('make');
+  check_start(' make');
   ($res, @items) = run_command('make -j8');
   check_res($res, @items);
-  check_start('check');
+  check_start(' check');
   ($res, @items) = run_command('make check');
   $res = 1 if grep { m/FAILED/ } @items;
   check_res($res, @items);

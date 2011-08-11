@@ -71,8 +71,8 @@ conversations: yes
 duplicate_db: skiplist
 mboxlist_db: skiplist
 seenstate_db: skiplist
-expunge_mode: delayed
-delete_mode: delayed
+#expunge_mode: delayed
+#delete_mode: delayed
 internaldate_heuristic: receivedheader
 rfc3028_strict: 0
 sievenotifier: mailto

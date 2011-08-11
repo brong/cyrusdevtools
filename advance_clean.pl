@@ -5,8 +5,11 @@ use Getopt::Std;
 
 my %Opts;
 
-my $base = 'clean';
-my $target = 'work';
+getopts('b:c:t:l:', \%Opts);
+
+my $base = $Opts{b} || 'clean';
+my $target = $Opts{t} || 'work';
+my $clean = $Opts{c} || $base;
 
 my @revs = git_revlist($base, $target);
 our $REV;
@@ -41,7 +44,7 @@ foreach my $rev (reverse @revs) {
   $res = 1 if grep { m/FAILED/ } @items;
   check_res($res, @items);
 
-  run_command('git checkout -B clean');
+  run_command("git checkout -B $clean");
 }
 
 sub git_revlist {

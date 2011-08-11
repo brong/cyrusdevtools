@@ -1,8 +1,14 @@
 #!/usr/bin/perl -w
 
 use strict;
+use Getopt::Std;
 
-my @revs = git_revlist('clean', 'work');
+my %Opts;
+
+my $base = 'clean';
+my $target = 'work';
+
+my @revs = git_revlist($base, $target);
 our $REV;
 our $SECTION;
 
@@ -10,8 +16,11 @@ unless (@revs) {
   die "NO MORE WORK TO DO!\n";
 }
 
+my $N = 0;
+
 foreach my $rev (reverse @revs) {
   $REV = $rev;
+  $N++;
   check_start("git $rev");
   my ($res, @items) = run_command("git checkout $rev");
   check_res($res, @items);
@@ -50,7 +59,13 @@ sub git_revlist {
 sub run_command {
   my $command = shift;
   my @items;
-  open(FH, "$command 2>&1 | tee /tmp/$REV-$SECTION.out |") || die "Failed to run $command";
+  my $pipe = '|';
+  if ($Opts{l}) {
+    my $s = $SECTION;
+    $s =~ s/\s//g;
+    $pipe = sprintf("| tee %s/%04d-%s-%s.out |", $Opts{l}, $N, $REV, $s);
+  }
+  open(FH, "$command 2>&1 $pipe") || die "Failed to run $command";
   @items = <FH>;
   close(FH);
   return ($?, @items);

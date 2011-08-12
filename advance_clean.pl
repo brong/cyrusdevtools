@@ -12,6 +12,20 @@ my $target = $Opts{t} || 'work';
 my $clean = $Opts{c} || $base;
 my $log = $Opts{l} ? 1 : 0;
 
+unless (keys %Opts) {
+  die <<EOF
+Usage: $0 [-b base] [-t target] [-c cleanname] [-l logdir]
+
+Check out every revision from base to target.  Run a full recompile
+and unit test.  If the revision passes the test, advance the 'clean'
+branch to that revision and move on.  If any commit fails, abort and
+leave the failed commit checked out.
+
+If logdir is specified, dump the output of every command into files
+in that directory.
+EOF
+}
+
 my @revs = git_revlist($base, $target);
 our $REV;
 our $SECTION;

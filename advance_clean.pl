@@ -10,38 +10,42 @@ getopts('b:c:t:l:', \%Opts);
 my $base = $Opts{b} || 'clean';
 my $target = $Opts{t} || 'work';
 my $clean = $Opts{c} || $base;
+my $log = $Opts{l} ? 1 : 0;
 
 my @revs = git_revlist($base, $target);
 our $REV;
 our $SECTION;
+our $N;
+our $M;
 
 unless (@revs) {
   die "NO MORE WORK TO DO!\n";
 }
 
-my $N = 0;
-
 foreach my $rev (reverse @revs) {
   $REV = $rev;
-  $N++;
-  check_start("git $rev");
-  my ($res, @items) = run_command("git checkout $rev");
+  $M = 0;
+  my (undef, @lines) = run_command("git log --oneline $REV");
+  $N = @lines;
+  printf("%05d %s", $N, $lines[0]);
+  check_start("checkout");
+  my ($res, @items) = run_command("git checkout $rev", $log);
   check_res($res, @items);
-  check_start(' configure');
+  check_start('configure');
   run_command('make clean');
-  run_command('aclocal -I cmulocal');
-  run_command('autoheader');
-  run_command('autoconf');
+  run_command('aclocal -I cmulocal', $log);
+  run_command('autoheader', $log);
+  run_command('autoconf', $log);
   ($res, @items) = run_command('CFLAGS="-g -W -Wall" ./configure ' .
                                '--enable-unit-tests --enable-replication ' .
-                               '--enable-nntp --enable-murder --enable-idled');
+                               '--enable-nntp --enable-murder --enable-idled', $log);
   check_res($res, @items);
-  check_start(' make');
-  ($res, @items) = run_command('make -j8');
+  check_start('make');
+  ($res, @items) = run_command('make -j8', $log);
   check_res($res, @items);
-  check_start(' check');
-  ($res, @items) = run_command('make check');
-  $res = 1 if grep { m/FAILED/ } @items;
+  check_start('check');
+  ($res, @items) = run_command('make check', $log);
+  $res = 1 if checks_failed(@items);
   check_res($res, @items);
 
   run_command("git checkout -B $clean");
@@ -61,12 +65,14 @@ sub git_revlist {
 
 sub run_command {
   my $command = shift;
+  my $log = shift;
   my @items;
   my $pipe = '|';
-  if ($Opts{l}) {
+  if ($log) {
     my $s = $SECTION;
     $s =~ s/\s//g;
-    $pipe = sprintf("| tee %s/%04d-%s-%s.out |", $Opts{l}, $N, $REV, $s);
+    my $r = substr($REV, 0, 7);
+    $pipe = sprintf("| tee -a %s/%04d-%s-%d-%s.out |", $Opts{l}, $N, $r, $M, $s);
   }
   open(FH, "$command 2>&1 $pipe") || die "Failed to run $command";
   @items = <FH>;
@@ -76,8 +82,9 @@ sub run_command {
 
 sub check_start {
   my $section = shift;
+  $M++;
   $| = 1;
-  print "  $section: ";
+  print "    - $section: ";
   $SECTION = $section;
 }
 
@@ -95,4 +102,16 @@ sub check_res {
   print "=================================================\n";
   print "Failed $SECTION of $REV\n";
   exit 1;
+}
+
+sub checks_failed {
+  my $found = 0;
+  for (@_) {
+    return 1 if m/FAILED/;
+    if (m/^\s*(?:suites|tests|asserts).*(\d+)\s*$/) {
+      return 1 if $1;
+      $found++;
+    }
+  }
+  return $found != 3;
 }

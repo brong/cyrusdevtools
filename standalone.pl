@@ -15,7 +15,7 @@ getopts('Dr:c:ua', \%Opts);
 my $unixhs = $Opts{u} ? 'yes' : 'no';
 my $altns = $Opts{a} ? 'yes' : 'no';
 my $del = $Opts{D};
-my $rootdir = $Opts{r} || "/tmp/ct";
+my $rootdir = $Opts{r} || "/tmpfs/ct";
 my $cyrusbase = $Opts{c} || "/usr/cyrus";
 
 my @pids;
@@ -24,7 +24,7 @@ my @tokill;
 open(FH, "ps ax |");
 while (<FH>) {
     my ($pid) = split;
-    if (m/replica\.pl/ || m/cyrus/ || m{/tmp/ct}) {
+    if (m/replica\.pl/ || m/cyrus/ || m{/tmpfs/ct}) {
 	push(@tokill, $pid) unless $pid == $$;
     }
 }
@@ -75,6 +75,7 @@ annotation_db: skiplist
 auditlog: yes
 conversations: yes
 conversations_counted_flags: \\Draft \\Flagged \$SomethingElse
+mailbox_initial_flags: \$SomethingElse \$HasAttachment \$IsNotification
 duplicate_db: skiplist
 mboxlist_db: skiplist
 seenstate_db: skiplist

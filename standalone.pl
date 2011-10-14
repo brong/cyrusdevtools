@@ -238,7 +238,12 @@ sub saslauthd {
     # XXX - custom logic?
 
     # OK :)
-    $client->print(pack("nA3", 2, "OK\000"));
+    if ($Password eq 'bad') {
+       $client->print(pack("nA3", 2, "NO\000"));
+    }
+    else {
+       $client->print(pack("nA3", 2, "OK\000"));
+    }
     $client->close();
   }
 }

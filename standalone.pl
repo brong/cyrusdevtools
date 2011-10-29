@@ -11,6 +11,8 @@ my %Opts;
 
 getopts('Dr:c:ua', \%Opts);
 
+my $skip = "skiplist";
+
 
 my $unixhs = $Opts{u} ? 'yes' : 'no';
 my $altns = $Opts{a} ? 'yes' : 'no';
@@ -71,14 +73,14 @@ admins: admin repluser
 altnamespace: $altns
 allowplaintext: yes
 allowusermoves: yes
-annotation_db: skiplist
+annotation_db: $skip
 auditlog: yes
 conversations: yes
 conversations_counted_flags: \\Draft \\Flagged \$SomethingElse
 mailbox_initial_flags: \$SomethingElse \$HasAttachment \$IsNotification
-duplicate_db: skiplist
-mboxlist_db: skiplist
-seenstate_db: skiplist
+duplicate_db: $skip
+mboxlist_db: $skip
+seenstate_db: $skip
 expunge_mode: delayed
 #delete_mode: delayed
 internaldate_heuristic: receivedheader
@@ -98,7 +100,7 @@ mboxname_lockpath: $basedir/metalock
 quota_db: quotalegacy
 servername: test_${type}_$$
 statuscache: on
-statuscache_db: skiplist
+statuscache_db: $skip
 #suppress_capabilities: QRESYNC SEARCH SORT
 sasl_pwcheck_method: saslauthd
 sasl_mech_list: PLAIN LOGIN DIGEST-MD5

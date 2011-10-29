@@ -52,7 +52,7 @@ foreach my $rev (reverse @revs) {
   run_command('autoconf', $log);
   ($res, @items) = run_command('CFLAGS="-g -W -Wall" ./configure ' .
                                '--enable-unit-tests --enable-replication ' .
-                               '--enable-nntp --enable-murder --enable-idled', $log);
+                               '--enable-nntp --with-bdb=db-4.6 --enable-murder --enable-idled', $log);
   check_res($res, @items);
   check_start('make');
   ($res, @items) = run_command('make -j8', $log);

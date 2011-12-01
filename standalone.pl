@@ -9,7 +9,7 @@ use Getopt::Std;
 
 my %Opts;
 
-getopts('Dr:c:ua', \%Opts);
+getopts('Dr:c:uae:d:', \%Opts);
 
 
 my $unixhs = $Opts{u} ? 'yes' : 'no';
@@ -17,6 +17,8 @@ my $altns = $Opts{a} ? 'yes' : 'no';
 my $del = $Opts{D};
 my $rootdir = $Opts{r} || "/tmpfs/ct";
 my $cyrusbase = $Opts{c} || "/usr/cyrus";
+my $em = $opts{e} || "delayed";
+my $dm = $opts{d} || "delayed";
 
 my @pids;
 my @tokill;
@@ -33,7 +35,6 @@ if (@tokill) {
     kill(9, @tokill);
 }
 close(FH);
-system("rm -f /tmp/*valgrind*");
 
 system("rm /etc/sasldb2");
 
@@ -62,6 +63,7 @@ foreach my $type (sort keys %ip) {
     mkdir("$basedir/conf/log/admin");
     mkdir("$basedir/conf/log/foo");
     mkdir("$basedir/conf/log/repluser");
+    mkdir("$basedir/valgrind");
 
     system("ip addr add $ip{$type} dev lo");
 
@@ -79,8 +81,8 @@ mailbox_initial_flags: \$SomethingElse \$HasAttachment \$IsNotification
 duplicate_db: skiplist
 mboxlist_db: skiplist
 seenstate_db: skiplist
-expunge_mode: delayed
-#delete_mode: delayed
+expunge_mode: $em
+delete_mode: $dm
 internaldate_heuristic: receivedheader
 rfc3028_strict: 0
 sievenotifier: mailto
@@ -129,7 +131,14 @@ __EOF
 
 SERVICES {
   imap          cmd="$cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:143"
-  #imapdebug     cmd="$cyrusbase/bin/debug_imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
+__EOF
+    if (-x "/usr/bin/valgrind") {
+      print $cfh <<__EOF;
+  imapvg        cmd="/usr/bin/valgrind --log-file=$basedir/valgrind/valgrind.%p --suppressions=/home/brong/src/cassandane/vg.supp --tool=memcheck --leak-check=full --show-reachable=yes $cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
+  imapmf        cmd="/usr/bin/valgrind --log-file=$basedir/valgrind/log.%p --tool=massif --massif-out-file=$basedir/valgrind/massif.%p $cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:145"
+__EOF
+    }
+    print $cfh <<__EOF;
   pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110"
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
   lmtplocal     cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf" listen="$basedir/conf/socket/lmtp"

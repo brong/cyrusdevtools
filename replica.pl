@@ -8,7 +8,7 @@ use Mail::IMAPTalk;
 use Cyrus::SIEVE::managesieve;
 
 my $del = shift;
-my $rootdir = shift || "/tmp/ct";
+my $rootdir = shift || "/tmpfs/ct";
 my $cyrusbase = shift || "/usr/cyrus";
 
 my @pids;

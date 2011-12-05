@@ -17,8 +17,8 @@ my $altns = $Opts{a} ? 'yes' : 'no';
 my $del = $Opts{D};
 my $rootdir = $Opts{r} || "/tmpfs/ct";
 my $cyrusbase = $Opts{c} || "/usr/cyrus";
-my $em = $opts{e} || "delayed";
-my $dm = $opts{d} || "delayed";
+my $em = $Opts{e} || "delayed";
+my $dm = $Opts{d} || "delayed";
 
 my @pids;
 my @tokill;

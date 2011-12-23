@@ -46,8 +46,10 @@ foreach my $type (sort keys %ip) {
     mkdir("$basedir/etc");
     mkdir("$basedir/run");
     mkdir("$basedir/meta");
+    mkdir("$basedir/meta2");
     mkdir("$basedir/metalock");
     mkdir("$basedir/data");
+    mkdir("$basedir/data2");
     mkdir("$basedir/conf");
     mkdir("$basedir/conf/db");
     mkdir("$basedir/conf/dbbak");
@@ -71,8 +73,8 @@ conversations: yes
 duplicate_db: skiplist
 mboxlist_db: skiplist
 seenstate_db: skiplist
-#expunge_mode: delayed
-#delete_mode: delayed
+expunge_mode: delayed
+delete_mode: delayed
 internaldate_heuristic: receivedheader
 rfc3028_strict: 0
 sievenotifier: mailto
@@ -85,6 +87,8 @@ metapartition_files: header index cache expunge
 defaultpartition: default
 partition-default: $basedir/data
 metapartition-default: $basedir/meta
+partition-p2: $basedir/data2
+metapartition-p2: $basedir/meta2
 mboxname_lockpath: $basedir/metalock
 servername: test_${type}_$$
 statuscache: on

@@ -9,7 +9,7 @@ use Getopt::Std;
 
 my %Opts;
 
-getopts('Dr:c:uae:d:', \%Opts);
+getopts('Dr:c:uae:d:x:', \%Opts);
 
 
 my $unixhs = $Opts{u} ? 'yes' : 'no';
@@ -19,6 +19,8 @@ my $rootdir = $Opts{r} || "/tmpfs/ct";
 my $cyrusbase = $Opts{c} || "/usr/cyrus";
 my $em = $Opts{e} || "delayed";
 my $dm = $Opts{d} || "delayed";
+
+my $skip = $Opts{x} || "skiplist";
 
 my @pids;
 my @tokill;
@@ -73,14 +75,14 @@ admins: admin repluser
 altnamespace: $altns
 allowplaintext: yes
 allowusermoves: yes
-annotation_db: skiplist
+annotation_db: $skip
 auditlog: yes
 conversations: yes
 conversations_counted_flags: \\Draft \\Flagged \$SomethingElse
 mailbox_initial_flags: \$SomethingElse \$HasAttachment \$IsNotification
-duplicate_db: skiplist
-mboxlist_db: skiplist
-seenstate_db: skiplist
+duplicate_db: $skip
+mboxlist_db: $skip
+seenstate_db: $skip
 expunge_mode: $em
 delete_mode: $dm
 internaldate_heuristic: receivedheader
@@ -100,7 +102,7 @@ mboxname_lockpath: $basedir/metalock
 quota_db: quotalegacy
 servername: test_${type}_$$
 statuscache: on
-statuscache_db: skiplist
+statuscache_db: $skip
 #suppress_capabilities: QRESYNC SEARCH SORT
 sasl_pwcheck_method: saslauthd
 sasl_mech_list: PLAIN LOGIN DIGEST-MD5

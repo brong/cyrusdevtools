@@ -9,10 +9,9 @@ use Getopt::Std;
 
 my %Opts;
 
-getopts('Dr:c:ua', \%Opts);
+getopts('Dr:c:uad:', \%Opts);
 
-my $skip = "skiplist";
-
+my $dbtype = $Opts{d} || "skiplist";
 
 my $unixhs = $Opts{u} ? 'yes' : 'no';
 my $altns = $Opts{a} ? 'yes' : 'no';
@@ -73,14 +72,14 @@ admins: admin repluser
 altnamespace: $altns
 allowplaintext: yes
 allowusermoves: yes
-annotation_db: $skip
+annotation_db: $dbtype
 auditlog: yes
 conversations: yes
 conversations_counted_flags: \\Draft \\Flagged \$SomethingElse
 mailbox_initial_flags: \$SomethingElse \$HasAttachment \$IsNotification
-duplicate_db: $skip
-mboxlist_db: $skip
-seenstate_db: $skip
+duplicate_db: $dbtype
+mboxlist_db: $dbtype
+seenstate_db: $dbtype
 expunge_mode: delayed
 #delete_mode: delayed
 internaldate_heuristic: receivedheader
@@ -100,8 +99,8 @@ mboxname_lockpath: $basedir/metalock
 quota_db: quotalegacy
 servername: test_${type}_$$
 statuscache: on
-statuscache_db: $skip
-#suppress_capabilities: QRESYNC SEARCH SORT
+statuscache_db: $dbtype
+suppress_capabilities: QRESYNC SEARCH SORT URLAUTH URLAUTH=BINARY
 sasl_pwcheck_method: saslauthd
 sasl_mech_list: PLAIN LOGIN DIGEST-MD5
 sasl_saslauthd_path: $basedir/run/mux
@@ -125,6 +124,7 @@ __EOF
     print $cfh <<__EOF;
 START {
   recover       cmd="$cyrusbase/bin/ctl_cyrusdb -C $basedir/etc/imapd.conf -r"
+  idled         cmd="$cyrusbase/bin/idled -C $basedir/etc/imapd.conf"
 __EOF
     print $cfh <<__EOF;
 }

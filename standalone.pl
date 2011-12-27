@@ -11,7 +11,7 @@ my %Opts;
 
 getopts('Dr:c:uae:d:x:', \%Opts);
 
-my $dbtype = $Opts{d} || "skiplist";
+my $dbtype = $Opts{x} || "skiplist";
 
 my $unixhs = $Opts{u} ? 'yes' : 'no';
 my $altns = $Opts{a} ? 'yes' : 'no';
@@ -20,8 +20,6 @@ my $rootdir = $Opts{r} || "/tmpfs/ct";
 my $cyrusbase = $Opts{c} || "/usr/cyrus";
 my $em = $Opts{e} || "delayed";
 my $dm = $Opts{d} || "delayed";
-
-my $skip = $Opts{x} || "skiplist";
 
 my @pids;
 my @tokill;
@@ -76,14 +74,14 @@ admins: admin repluser
 altnamespace: $altns
 allowplaintext: yes
 allowusermoves: yes
-annotation_db: $skip
+annotation_db: $dbtype
 auditlog: yes
 conversations: yes
 conversations_counted_flags: \\Draft \\Flagged \$SomethingElse
 mailbox_initial_flags: \$SomethingElse \$HasAttachment \$IsNotification
-duplicate_db: $skip
-mboxlist_db: $skip
-seenstate_db: $skip
+duplicate_db: $dbtype
+mboxlist_db: $dbtype
+seenstate_db: $dbtype
 expunge_mode: $em
 delete_mode: $dm
 internaldate_heuristic: receivedheader
@@ -103,9 +101,8 @@ mboxname_lockpath: $basedir/metalock
 quota_db: quotalegacy
 servername: test_${type}_$$
 statuscache: on
-statuscache_db: $skip
 statuscache_db: $dbtype
-suppress_capabilities: QRESYNC SEARCH SORT URLAUTH URLAUTH=BINARY
+suppress_capabilities: URLAUTH URLAUTH=BINARY SORT=DISPLAY
 sasl_pwcheck_method: saslauthd
 sasl_mech_list: PLAIN LOGIN DIGEST-MD5
 sasl_saslauthd_path: $basedir/run/mux

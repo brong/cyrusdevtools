@@ -11,6 +11,7 @@ my %Opts;
 
 getopts('Dr:c:uae:d:x:', \%Opts);
 
+my $dbtype = $Opts{d} || "skiplist";
 
 my $unixhs = $Opts{u} ? 'yes' : 'no';
 my $altns = $Opts{a} ? 'yes' : 'no';
@@ -103,7 +104,8 @@ quota_db: quotalegacy
 servername: test_${type}_$$
 statuscache: on
 statuscache_db: $skip
-#suppress_capabilities: QRESYNC SEARCH SORT
+statuscache_db: $dbtype
+suppress_capabilities: QRESYNC SEARCH SORT URLAUTH URLAUTH=BINARY
 sasl_pwcheck_method: saslauthd
 sasl_mech_list: PLAIN LOGIN DIGEST-MD5
 sasl_saslauthd_path: $basedir/run/mux
@@ -127,6 +129,7 @@ __EOF
     print $cfh <<__EOF;
 START {
   recover       cmd="$cyrusbase/bin/ctl_cyrusdb -C $basedir/etc/imapd.conf -r"
+  idled         cmd="$cyrusbase/bin/idled -C $basedir/etc/imapd.conf"
 __EOF
     print $cfh <<__EOF;
 }

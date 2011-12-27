@@ -6,13 +6,24 @@ use IO::File;
 use IO::Socket::UNIX;
 use Mail::IMAPTalk;
 
-my $del = shift;
-my $rootdir = shift || "/tmpfs/ct";
+use Getopt::Std;
 
-$rootdir =~ s{/$}{};
+my %Opts;
+
+getopts('Dr:c:uad:', \%Opts);
+
+my $dbtype = $Opts{d} || "skiplist";
+
+my $unixhs = $Opts{u} ? 'yes' : 'no';
+my $altns = $Opts{a} ? 'yes' : 'no';
+my $del = $Opts{D};
+my $rootdir = $Opts{r} || "/tmpfs/ct";
+my $cyrusbase = $Opts{c} || "/usr/cyrus";
 
 my @pids;
 my @tokill;
+
+$rootdir =~ s{/$}{};
 
 open(FH, "ps ax |");
 while (<FH>) {
@@ -104,6 +115,7 @@ admins: admin test mbackend1 mbackend2 mbackend3 mfrontend1 mfrontend2 mfrontend
 allowallsubscribe: 1
 allowplaintext: yes
 allowusermoves: yes
+altnamespace: $altns
 annotation_db: skiplist
 auditlog: yes
 duplicate_db: skiplist
@@ -131,7 +143,7 @@ tls_cipher_list: TLSv1 :SSLv3 :SSLv2 : !DES : !LOW :\@STRENGTH
 tls_ca_file: $rootdir/server.pem
 tls_cert_file: $rootdir/server.pem
 tls_key_file: $rootdir/server.pem
-unixhierarchysep: on
+unixhierarchysep: $unixhs
 xlist-drafts: Drafts
 xlist-sent: Sent Items
 xlist-trash: Trash
@@ -262,18 +274,23 @@ my $admin2 = Mail::IMAPTalk->new(
   Password => 'test',
 );
 
-$admin->create('user/foo', 'default');
-$admin->create('user/foo/subdir', 'default');
-$admin->create('user/foo/Sent Items', 'default');
-$admin->create('user/foo/Drafts', 'default');
-$admin->create('user/foo/Trash', 'default');
-$admin->setacl('user/foo', 'admin', "lrswipcd");
-$admin->setquota('user/foo', "(STORAGE 100000)");
+$admin->create(_f('user/foo'));
+$admin->create(_f('user/foo/subdir'));
+$admin->create(_f('user/foo/Sent Items'));
+$admin->create(_f('user/foo/Drafts'));
+$admin->create(_f('user/foo/Trash'));
+$admin->create(_f('user/bar'));
+$admin->setacl(_f('user/bar'), 'foo', "lrswipcd");
+$admin->setacl(_f('user/foo'), 'admin', "lrswipcd");
+$admin->setquota(_f('user/foo'), "(STORAGE 100000)");
+$admin->create(_f('random'));
+$admin->setacl(_f('random'), 'foo', "lrswipcd");
+$admin->setacl(_f('user/foo'), 'hello', "lrswipcd");
 
-$admin2->create('user/user.name@domain.com', 'default');
-$admin2->create('user/user.name/Drafts@domain.com', 'default');
-$admin2->setacl('user/user.name@domain.com', 'foo', "lrswipcd");
-$admin2->setquota('user/user.name@domain.com', "(STORAGE 100000)");
+$admin2->create(_f('user/user.name@domain.com'), 'default');
+$admin2->create(_f('user/user.name/Drafts@domain.com'), 'default');
+$admin2->setacl(_f('user/user.name@domain.com'), 'foo', "lrswipcd");
+$admin2->setquota(_f('user/user.name@domain.com'), "(STORAGE 100000)");
 
 my $msg = <<EOF;
 From: test <test\@example.com>
@@ -363,5 +380,16 @@ sub slurpto {
   while (my $line = <$sock>) {
     print $line;
     last if $line =~ m/^\d\d\d /;
+  }
+}
+
+sub _f {
+  my $f = shift;
+  my @bits = split '/', $f;
+  if ($unixhs eq 'yes') {
+    return join '/', @bits;
+  }
+  else {
+    return join '.', @bits;
   }
 }

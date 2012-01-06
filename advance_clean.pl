@@ -5,12 +5,13 @@ use Getopt::Std;
 
 my %Opts;
 
-getopts('b:c:t:l:', \%Opts);
+getopts('b:c:t:l:u', \%Opts);
 
 my $base = $Opts{b} || 'clean';
 my $target = $Opts{t} || 'work';
 my $clean = $Opts{c} || $base;
 my $log = $Opts{l} ? 1 : 0;
+my $dounit = $Opts{u};
 
 unless (keys %Opts) {
   die <<EOF
@@ -54,13 +55,17 @@ foreach my $rev (reverse @revs) {
                                '--enable-unit-tests --enable-replication ' .
                                '--enable-nntp --with-bdb=db-4.6 --enable-murder --enable-idled', $log);
   check_res($res, @items);
+
   check_start('make');
-  ($res, @items) = run_command('make -j8', $log);
+  ($res, @items) = run_command('make -j 8', $log);
   check_res($res, @items);
-  check_start('check');
-  ($res, @items) = run_command('make check', $log);
-  $res = 1 if checks_failed(@items);
-  check_res($res, @items);
+
+  if ($dounit) {
+    check_start('check');
+    ($res, @items) = run_command('make check', $log);
+    $res = 1 if checks_failed(@items);
+    check_res($res, @items);
+  }
 
   run_command("git checkout -B $clean");
 }

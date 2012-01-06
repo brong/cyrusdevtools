@@ -205,7 +205,12 @@ $admin->setacl(_f('user/bar'), 'foo', "lrswipcd");
 $admin->setacl(_f('user/foo'), 'admin', "lrswipcd");
 $admin->setquota(_f('user/foo'), "(STORAGE 100000)");
 $admin->create(_f('random'));
-$admin->setacl(_f('random'), 'foo', "lrswipcd");
+$admin->create(_f('cmu'));
+$admin->create(_f('cmu/hello/world'));
+$admin->create(_f('cmu/hello/other'));
+$admin->create(_f('cmu/a/b'));
+$admin->create(_f('cmu/b/c'));
+$admin->create(_f('very/deeply/nested/nothing/much'));
 
 sleep 2;
 $admin->setacl(_f('user/foo'), 'hello', "lrswipcd");

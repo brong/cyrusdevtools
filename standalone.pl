@@ -9,7 +9,7 @@ use Getopt::Std;
 
 my %Opts;
 
-getopts('Dr:c:uae:d:x:', \%Opts);
+getopts('Dr:c:uae:d:x:o:', \%Opts);
 
 my $dbtype = $Opts{x} || "skiplist";
 
@@ -18,8 +18,12 @@ my $altns = $Opts{a} ? 'yes' : 'no';
 my $del = $Opts{D};
 my $rootdir = $Opts{r} || "/tmpfs/ct";
 my $cyrusbase = $Opts{c} || "/usr/cyrus";
-my $em = $Opts{e} || "delayed";
-my $dm = $Opts{d} || "delayed";
+my $em = $Opts{e} || "default";
+my $dm = $Opts{d} || "immediate";
+my @extra;
+if ($Opts{o}) {
+    @extra = split /,/, $Opts{o};
+}
 
 my @pids;
 my @tokill;
@@ -70,6 +74,7 @@ foreach my $type (sort keys %ip) {
 
     my $ifh = IO::File->new(">$basedir/etc/imapd.conf");
     print $ifh <<__EOF;
+deletedprefix: -
 admins: admin repluser
 altnamespace: $altns
 allowplaintext: yes
@@ -78,12 +83,12 @@ annotation_db: $dbtype
 auditlog: yes
 conversations: yes
 conversations_counted_flags: \\Draft \\Flagged \$SomethingElse
-mailbox_initial_flags: \$SomethingElse \$HasAttachment \$IsNotification
 duplicate_db: $dbtype
 mboxlist_db: $dbtype
 seenstate_db: $dbtype
 expunge_mode: $em
 delete_mode: $dm
+debug: 1
 internaldate_heuristic: receivedheader
 rfc3028_strict: 0
 sievenotifier: mailto
@@ -120,6 +125,9 @@ mailnotifier: log
 username_tolower: 1
 proc_path: /tmp/procpath
 __EOF
+    foreach my $item (@extra) {
+	print $ifh "$item\n";
+    }
     $ifh->close();
 
     my $cfh = IO::File->new(">$basedir/etc/cyrus.conf");

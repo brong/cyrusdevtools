@@ -74,12 +74,13 @@ foreach my $type (sort keys %ip) {
 
     my $ifh = IO::File->new(">$basedir/etc/imapd.conf");
     print $ifh <<__EOF;
-deletedprefix: -
+#deletedprefix: -
 admins: admin repluser
 altnamespace: $altns
 allowplaintext: yes
 allowusermoves: yes
 annotation_db: $dbtype
+annotation_allow_undefined: yest
 auditlog: yes
 conversations: yes
 conversations_counted_flags: \\Draft \\Flagged \$SomethingElse
@@ -90,6 +91,8 @@ expunge_mode: $em
 delete_mode: $dm
 debug: 1
 internaldate_heuristic: receivedheader
+fulldirhash: 1
+hashimapspool: 1
 rfc3028_strict: 0
 sievenotifier: mailto
 sieve_extensions: fileinto reject vacation imapflags notify envelope body relational regex subaddress copy
@@ -97,20 +100,21 @@ sievedir: $basedir/conf/sieve
 configdirectory: $basedir/conf
 syslog_prefix: test_${type}_$$
 guid_mode: sha1
-#metapartition_files: header index cache expunge
+metapartition_files: header index
 defaultpartition: default
 postuser: postuser
 partition-default: $basedir/data
-#metapartition-default: $basedir/meta
+metapartition-default: $basedir/meta
 mboxname_lockpath: $basedir/metalock
 quota_db: quotalegacy
 servername: test_${type}_$$
 statuscache: on
 statuscache_db: $dbtype
-suppress_capabilities: URLAUTH URLAUTH=BINARY SORT=DISPLAY
+#suppress_capabilities: URLAUTH URLAUTH=BINARY SORT=DISPLAY
 sasl_pwcheck_method: saslauthd
 sasl_mech_list: PLAIN LOGIN DIGEST-MD5
 sasl_saslauthd_path: $basedir/run/mux
+specialusealways: 1
 xlist-drafts: Drafts
 xlist-sent: Sent Items
 xlist-trash: Trash

@@ -5,7 +5,6 @@ use warnings;
 use IO::File;
 use IO::Socket::UNIX;
 use Mail::IMAPTalk;
-use Cyrus::SIEVE::managesieve;
 
 my $del = shift;
 my $rootdir = shift || "/tmpfs/ct";
@@ -120,7 +119,7 @@ START {
 __EOF
     foreach my $other (@others) {
 	print $cfh <<__EOF;
-  sync_$other    cmd="$cyrusbase/bin/sync_client -C $basedir/etc/imapd.conf -n $other -r -v"
+  sync$other    cmd="$cyrusbase/bin/sync_client -C $basedir/etc/imapd.conf -n $other -r -v"
 __EOF
     }
     print $cfh <<__EOF;
@@ -215,7 +214,7 @@ if allof(
 }
 __EOF
 close(FH);
-dosieve($filename);
+#dosieve($filename);
 
 # XXX - fun here
 

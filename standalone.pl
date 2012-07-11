@@ -123,6 +123,7 @@ virtdomains: userid
 unixhierarchysep: $unixhs
 lmtp_downcase_rcpt: 1
 popuseacl: 1
+popsubfolders: 1
 allowapop: 0
 imapidresponse: 0
 mailnotifier: log

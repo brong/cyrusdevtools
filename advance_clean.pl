@@ -47,13 +47,11 @@ foreach my $rev (reverse @revs) {
   my ($res, @items) = run_command("git checkout $rev", $log);
   check_res($res, @items);
   check_start('configure');
-  run_command('make clean');
-  run_command('aclocal -I cmulocal', $log);
-  run_command('autoheader', $log);
-  run_command('autoconf', $log);
-  ($res, @items) = run_command('CFLAGS="-g -W -Wall" ./configure ' .
+  run_command('git clean -f -x', $log);
+  run_command('autoreconf -v -i', $log);
+  ($res, @items) = run_command('CFLAGS="-g -W -Wall -Wextra -Werror" ./configure ' .
                                '--enable-unit-tests --enable-replication ' .
-                               '--enable-nntp --with-bdb=db-4.6 --enable-murder --enable-idled', $log);
+                               '--enable-nntp --enable-murder --enable-idled', $log);
   check_res($res, @items);
 
   check_start('make');

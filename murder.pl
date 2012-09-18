@@ -197,6 +197,7 @@ __EOF
     my $IMAPD = 'imapd';
     my $start = "";
     my $rest = "";
+    my $preauth = " -a";
 
     if ($type eq 'mmaster') {
 	$rest =  qq(mupdate       cmd="$cyrusbase/bin/mupdate -C $basedir/etc/imapd.conf -m" listen="$ip{$type}:3905" prefork=1);
@@ -204,6 +205,7 @@ __EOF
     elsif ($type =~ m/^mbackend/) {
 	$start = qq(mupdatepush   cmd="$cyrusbase/bin/ctl_mboxlist -C $basedir/etc/imapd.conf -m");
 	#$rest =  qq(mupdate       cmd="$cyrusbase/bin/mupdate -C $basedir/etc/imapd.conf" listen="$ip{$type}:3905" prefork=1);
+	$preauth = "";
     }
     elsif ($type =~ m/^mfrontend/) {
 	$rest =  qq(mupdate       cmd="$cyrusbase/bin/mupdate -C $basedir/etc/imapd.conf" listen="$ip{$type}:3905" prefork=1);
@@ -220,9 +222,9 @@ START {
 }
 
 SERVICES {
-  imap          cmd="$cyrusbase/bin/$IMAPD -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:143" provide_uuid=1 maxfds=2048
-  pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110" provide_uuid=1
-  lmtp          cmd="$cyrusbase/bin/$LMTPD -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003" provide_uuid=1 maxfds=2048
+  imap          cmd="$cyrusbase/bin/$IMAPD -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:143"
+  pop3          cmd="$cyrusbase/bin/pop3d -C $basedir/etc/imapd.conf" listen="$ip{$type}:110"
+  lmtp          cmd="$cyrusbase/bin/$LMTPD -C $basedir/etc/imapd.conf$preauth" listen="$ip{$type}:2003"
   $rest
 }
 

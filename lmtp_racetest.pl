@@ -8,8 +8,10 @@ use Mail::IMAPTalk;
 use Data::Dumper;
 use threads;
 
+my $server = 'mbackend3';
+
 my $admin = Mail::IMAPTalk->new(
-  Server   => '127.0.0.11',
+  Server   => 'mfrontend1',
   Port     => "143",
   Username => 'admin',
   Password => 'test',
@@ -22,7 +24,7 @@ $admin->rename("user.foo", "user.foo", "mbackend2");
 my $res = $thr->join();
 
 my $client = Mail::IMAPTalk->new(
-  Server   => '127.0.0.11',
+  Server   => 'mfrontend1',
   Port     => "143",
   Username => 'foo',
   Password => 'test',
@@ -80,7 +82,7 @@ sub dolmtp {
   my $tgt = shift;
   my $msg = shift;
   my ($code, $line);
-  my $sock = IO::Socket::INET->new("127.0.0.11:2003");
+  my $sock = IO::Socket::INET->new("$server:2006");
   die "FAILED to create socket $!" unless $sock;
 
   $line = <$sock>;

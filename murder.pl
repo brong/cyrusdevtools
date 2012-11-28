@@ -58,15 +58,15 @@ my %ip = (
 my %version = (
     #mmaster => 'cyrus24',
     #mfrontend1 => 'cyrus24',
-    #mfrontend2 => 'cyrus24',
+    mfrontend2 => 'cyrus24',
     #mfrontend3 => 'cyrus24',
     #mfrontend2 => 'cyrus22',
-    #mfrontend3 => 'cyrus23',
+    mfrontend3 => 'cyrus23',
     #mbackend1 => 'cyrus24',
-    #mbackend2 => 'cyrus24',
+    mbackend2 => 'cyrus24',
     #mbackend3 => 'cyrus24',
     #mbackend2 => 'cyrus22',
-    #mbackend3 => 'cyrus23',
+    mbackend3 => 'cyrus23',
 );
 
 my @order = qw(mmaster

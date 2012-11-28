@@ -8,7 +8,7 @@ use Mail::IMAPTalk;
 use Data::Dumper;
 use threads;
 
-my $server = 'mbackend3';
+my $server = 'mfrontend2';
 
 my $admin = Mail::IMAPTalk->new(
   Server   => 'mfrontend1',

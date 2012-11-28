@@ -17,7 +17,7 @@ my $unixhs = $Opts{u} ? 'yes' : 'no';
 my $altns = $Opts{a} ? 'yes' : 'no';
 my $del = $Opts{D};
 my $rootdir = $Opts{r} || "/tmpfs/ct";
-my $cyrusbase = $Opts{c} || "/usr/cyrus";
+my $cyrusbase = $Opts{c} || "/usr/caldav24";
 my $em = $Opts{e} || "default";
 my $dm = $Opts{d} || "immediate";
 my @extra;
@@ -159,6 +159,7 @@ __EOF
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
   lmtplocal     cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf" listen="$basedir/conf/socket/lmtp"
   fud           cmd="$cyrusbase/bin/fud -C $basedir/etc/imapd.conf" listen="$ip{$type}:4201" proto="udp"
+  httpd         cmd="$cyrusbase/bin/httpd -C $basedir/etc/imapd.conf" listen="$ip{$type}:80"
 }
 
 EVENTS {

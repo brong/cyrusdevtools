@@ -9,7 +9,7 @@ use Getopt::Std;
 
 my %Opts;
 
-getopts('Dr:c:uae:d:x:o:l:', \%Opts);
+getopts('Dr:c:uae:d:x:o:', \%Opts);
 
 my $dbtype = $Opts{x} || "skiplist";
 
@@ -37,7 +37,7 @@ Usage: $0
  -c cyrusbase (/usr/cyrus)
  -e expungemode (default)
  -d deletemode (immediate)
- -l filename (append to user foo's inbox this file via lmtp)
+ 
 EOF
 }
 
@@ -107,8 +107,8 @@ expunge_mode: $em
 delete_mode: $dm
 debug: 1
 internaldate_heuristic: receivedheader
-fulldirhash: 1
-hashimapspool: 1
+fulldirhash: 0
+hashimapspool: 0
 rfc3028_strict: 0
 sievenotifier: mailto
 sieve_extensions: fileinto reject vacation imapflags notify envelope body relational regex subaddress copy
@@ -116,7 +116,7 @@ sievedir: $basedir/conf/sieve
 configdirectory: $basedir/conf
 syslog_prefix: test_${type}_$$
 guid_mode: sha1
-metapartition_files: header index cache
+metapartition_files: header index
 defaultpartition: default
 postuser: postuser
 partition-default: $basedir/data
@@ -130,6 +130,15 @@ statuscache_db: $dbtype
 sasl_pwcheck_method: saslauthd
 sasl_mech_list: PLAIN LOGIN DIGEST-MD5
 sasl_saslauthd_path: $basedir/run/mux
+search_engine: xapian
+search_index_headers: no
+search_batchsize: 100
+tsearchpartition-default: $basedir/search-t
+msearchpartition-default: $basedir/search-m
+dsearchpartition-default: $basedir/search-d
+defaultsearchtier: t
+sync_log: 1
+sync_log_channels: squatter
 specialusealways: 1
 xlist-drafts: Drafts
 xlist-sent: Sent Items
@@ -157,6 +166,7 @@ __EOF
 START {
   recover       cmd="$cyrusbase/bin/ctl_cyrusdb -C $basedir/etc/imapd.conf -r"
   idled         cmd="$cyrusbase/bin/idled -C $basedir/etc/imapd.conf"
+  squatter      cmd="$cyrusbase/bin/squatter -C $basedir/etc/imapd.conf -R"
 __EOF
     print $cfh <<__EOF;
 }
@@ -254,19 +264,8 @@ if (open(FH, "<8440-1290290440-1")) {
   close(FH);
 }
 print "created\n";
-
-if ($Opts{l} && open(FH, "<$Opts{l}")) {
-  print "Appending $Opts{l} via LMTP\n";
-my $data;
-{
-  local $/ = undef;
-  $data = <FH>;
-  close(FH);
-  $data .= ".\r\n";
-}
-  dolmtp('foo', $data);
-  print "done lmtp\n";
-}
+# let's see about dupelim then...
+dolmtp('foo', $msg);
 
 # XXX - fun here
 

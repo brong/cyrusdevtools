@@ -75,6 +75,7 @@ foreach my $type (sort keys %ip) {
     mkdir("$basedir/meta");
     mkdir("$basedir/metalock");
     mkdir("$basedir/data");
+    mkdir("$basedir/archive");
     mkdir("$basedir/conf");
     mkdir("$basedir/conf/db");
     mkdir("$basedir/conf/dbbak");
@@ -107,8 +108,8 @@ expunge_mode: $em
 delete_mode: $dm
 debug: 1
 internaldate_heuristic: receivedheader
-fulldirhash: 1
-hashimapspool: 1
+#fulldirhash: 1
+#hashimapspool: 1
 rfc3028_strict: 0
 sievenotifier: mailto
 sieve_extensions: fileinto reject vacation imapflags notify envelope body relational regex subaddress copy
@@ -116,11 +117,12 @@ sievedir: $basedir/conf/sieve
 configdirectory: $basedir/conf
 syslog_prefix: test_${type}_$$
 guid_mode: sha1
-metapartition_files: header index cache
+#metapartition_files: header index cache
 defaultpartition: default
 postuser: postuser
 partition-default: $basedir/data
-metapartition-default: $basedir/meta
+archivepartition-default: $basedir/archive
+#metapartition-default: $basedir/meta
 mboxname_lockpath: $basedir/metalock
 quota_db: quotalegacy
 servername: test_${type}_$$

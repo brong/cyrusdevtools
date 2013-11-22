@@ -113,7 +113,7 @@ statuscache: on
 statuscache_db: $dbtype
 #suppress_capabilities: URLAUTH URLAUTH=BINARY SORT=DISPLAY
 sasl_pwcheck_method: saslauthd
-sasl_mech_list: PLAIN LOGIN DIGEST-MD5
+sasl_mech_list: PLAIN LOGIN
 sasl_saslauthd_path: $basedir/run/mux
 specialusealways: 1
 xlist-drafts: Drafts
@@ -130,7 +130,8 @@ imapidresponse: 0
 mailnotifier: log
 username_tolower: 1
 proc_path: /tmp/procpath
-
+httpmodules: caldav carddav
+caldav_realm: FastMail
 __EOF
     foreach my $item (@extra) {
 	print $ifh "$item\n";
@@ -208,7 +209,7 @@ $admin->create(_f('user/foo/subdir'));
 $admin->create(_f('user/foo/Sent Items'));
 $admin->create(_f('user/foo/Drafts'));
 $admin->create(_f('user/foo/Trash'));
-$admin->create(_f('user/foo/#calendars/events'));
+#$admin->create(_f('user/foo/#calendars/events'));
 $admin->setacl(_f('user/foo'), 'admin', "lrswipcd");
 $admin->setquota(_f('user/foo'), "(STORAGE 100000)");
 

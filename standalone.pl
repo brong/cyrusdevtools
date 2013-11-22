@@ -158,13 +158,16 @@ __EOF
     print $cfh <<__EOF;
 START {
   recover       cmd="$cyrusbase/bin/ctl_cyrusdb -C $basedir/etc/imapd.conf -r"
-  idled         cmd="$cyrusbase/bin/idled -C $basedir/etc/imapd.conf"
 __EOF
     print $cfh <<__EOF;
 }
 
+DAEMON {
+  idled         cmd="$cyrusbase/bin/idled -C $basedir/etc/imapd.conf"
+}
+
 SERVICES {
-  imap          cmd="$cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:143"
+  imap          cmd="$cyrusbase/bin/imapd -C $basedir/etc/imapd.conf" listen="$ip{$type}:143"
 __EOF
     if (-x "/usr/bin/valgrind") {
       print $cfh <<__EOF;
@@ -203,7 +206,7 @@ __EOF
       if (-f "/proc/sys/kernel/core_uses_pid") {
 	system("echo 1 >/proc/sys/kernel/core_uses_pid");
       }
-      system("ulimit -c 102400 && $cyrusbase/bin/master -C $basedir/etc/imapd.conf -M $basedir/etc/cyrus.conf -p $basedir/run/cyrus-$type.pid");
+      system("ulimit -c 102400 && $cyrusbase/bin/master -C $basedir/etc/imapd.conf -M $basedir/etc/cyrus.conf -p $basedir/run/cyrus-$type.pid -D");
       exit 0;
     }
     push @pids, ($masterpid, $saslpid);

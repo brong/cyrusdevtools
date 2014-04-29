@@ -69,6 +69,7 @@ allowusermoves: yes
 annotation_db: skiplist
 auditlog: yes
 conversations: yes
+debug: 1
 duplicate_db: skiplist
 mboxlist_db: skiplist
 seenstate_db: skiplist
@@ -93,7 +94,7 @@ servername: test_${type}_$$
 statuscache: on
 statuscache_db: skiplist
 sasl_pwcheck_method: saslauthd
-sasl_mech_list: PLAIN LOGIN DIGEST-MD5
+sasl_mech_list: PLAIN LOGIN
 sasl_saslauthd_path: $basedir/run/mux
 xlist-drafts: Drafts
 xlist-sent: Sent Items
@@ -105,6 +106,9 @@ sync_log_channels: @others
 sync_authname: repluser
 sync_password: replpass
 sync_realm: internal
+httpmodules: caldav carddav
+httpallowcompress: no
+caldav_realm: FastMail
 __EOF
     foreach my $other (@others) {
 	print $ifh $other . "_sync_host: $ip{$other}\n";
@@ -132,6 +136,7 @@ SERVICES {
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
   syncserver    cmd="$cyrusbase/bin/sync_server -C $basedir/etc/imapd.conf -p 1" listen="$ip{$type}:2005"
   sieve         cmd="$cyrusbase/bin/timsieved -C $basedir/etc/imapd.conf" listen="$ip{$type}:2000"
+  httpd         cmd="$cyrusbase/bin/httpd -C $basedir/etc/imapd.conf" listen="$ip{$type}:80"
 }
 
 EVENTS {

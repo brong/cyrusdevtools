@@ -17,7 +17,7 @@ my $unixhs = $Opts{u} ? 'yes' : 'no';
 my $altns = $Opts{a} ? 'yes' : 'no';
 my $del = $Opts{D};
 my $rootdir = $Opts{r} || "/tmpfs/ct";
-my $cyrusbase = $Opts{c} || "/usr/caldav24";
+my $cyrusbase = $Opts{c} || "/usr/cyrus";
 my $em = $Opts{e} || "default";
 my $dm = $Opts{d} || "immediate";
 my @extra;
@@ -120,6 +120,7 @@ xlist-drafts: Drafts
 xlist-sent: Sent Items
 xlist-trash: Trash
 xlist-spam: Junk Mail
+defaultdomain: internal
 virtdomains: userid
 unixhierarchysep: $unixhs
 lmtp_downcase_rcpt: 1
@@ -212,6 +213,19 @@ $admin->create(_f('user/foo/Trash'));
 #$admin->create(_f('user/foo/#calendars/events'));
 $admin->setacl(_f('user/foo'), 'admin', "lrswipcd");
 $admin->setquota(_f('user/foo'), "(STORAGE 100000)");
+
+$admin->create(_f('user/example@example.com'));
+
+$admin->create(_f('user/foo/#calendars/Default'), "(TYPE CALENDAR)");
+$admin->create(_f('user/foo/#calendars/Inbox'), "(TYPE CALENDAR)");
+$admin->create(_f('user/foo/#calendars/Outbox'), "(TYPE CALENDAR)");
+$admin->create(_f('user/foo/#calendars/Private'), "(TYPE CALENDAR)");
+
+$admin->create(_f('user/bar'));
+$admin->create(_f('user/bar/#calendars/Shared'), "(TYPE CALENDAR)");
+$admin->setacl(_f('user/bar/#calendars/Shared'), 'foo', "lrswipcd");
+$admin->create(_f('user/bar/#calendars/ReadOnly'), "(TYPE CALENDAR)");
+$admin->setacl(_f('user/bar/#calendars/ReadOnly'), 'foo', "lrs");
 
 sleep 2;
 $admin->setacl(_f('user/foo'), 'hello', "lrswipcd");

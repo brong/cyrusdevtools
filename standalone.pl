@@ -173,6 +173,7 @@ __EOF
       print $cfh <<__EOF;
   imapvg        cmd="/usr/bin/valgrind --log-file=$basedir/valgrind/valgrind.%p --suppressions=/home/brong/src/cassandane/vg.supp --tool=memcheck --leak-check=full --show-reachable=yes $cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:144"
   imapmf        cmd="/usr/bin/valgrind --log-file=$basedir/valgrind/log.%p --tool=massif --massif-out-file=$basedir/valgrind/massif.%p $cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -t 600" listen="$ip{$type}:145"
+  imapcg        cmd="/usr/bin/valgrind --log-file=$basedir/valgrind/callgrind.log.%p --tool=callgrind --callgrind-out-file=$basedir/valgrind/callgrind.out.%p $cyrusbase/bin/imapd -C $basedir/etc/imapd.conf -U 1" listen="$ip{$type}:146"
 __EOF
     }
     print $cfh <<__EOF;

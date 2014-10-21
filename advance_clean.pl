@@ -5,7 +5,7 @@ use Getopt::Std;
 
 my %Opts;
 
-getopts('b:c:t:l:u', \%Opts);
+getopts('b:c:t:l:ufF', \%Opts);
 
 my $base = $Opts{b} || 'clean';
 my $target = $Opts{t} || 'work';
@@ -24,6 +24,8 @@ leave the failed commit checked out.
 
 If logdir is specified, dump the output of every command into files
 in that directory.
+
+  -f means go fast (just make)
 EOF
 }
 
@@ -37,6 +39,7 @@ unless (@revs) {
   die "NO MORE WORK TO DO!\n";
 }
 
+my $dofast = $Opts{F};
 foreach my $rev (reverse @revs) {
   $REV = $rev;
   $M = 0;
@@ -46,13 +49,15 @@ foreach my $rev (reverse @revs) {
   check_start("checkout");
   my ($res, @items) = run_command("git checkout $rev", $log);
   check_res($res, @items);
-  check_start('configure');
-  run_command('git clean -f -x', $log);
-  run_command('autoreconf -v -i', $log);
-  ($res, @items) = run_command('CFLAGS="-g -W -Wall -Wextra -Werror" ./configure ' .
-                               '--enable-unit-tests --enable-replication ' .
-                               '--enable-nntp --enable-murder --enable-idled', $log);
-  check_res($res, @items);
+  unless ($dofast) {
+    check_start('configure');
+    run_command('git clean -f -x', $log);
+    run_command('autoreconf -v -i', $log);
+    ($res, @items) = run_command('CFLAGS="-g -W -Wall -Wextra -Werror" ./configure ' .
+                                 '--enable-unit-tests --enable-replication ' .
+                                 '--enable-nntp --enable-murder --enable-idled --enable-http', $log);
+    check_res($res, @items);
+  }
 
   check_start('make');
   ($res, @items) = run_command('make -j 8', $log);
@@ -64,6 +69,8 @@ foreach my $rev (reverse @revs) {
     $res = 1 if checks_failed(@items);
     check_res($res, @items);
   }
+
+  $dofast = 1 if $Opts{f};
 
   run_command("git checkout -B $clean");
 }

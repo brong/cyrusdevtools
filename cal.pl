@@ -67,6 +67,11 @@ foreach my $type (sort keys %ip) {
     mkdir("$basedir/conf/log");
     mkdir("$basedir/conf/log/admin");
     mkdir("$basedir/conf/log/foo");
+    mkdir("$basedir/conf/log/user01");
+    mkdir("$basedir/conf/log/user02");
+    mkdir("$basedir/conf/log/user03");
+    mkdir("$basedir/conf/log/user04");
+    mkdir("$basedir/conf/log/user05");
     mkdir("$basedir/conf/log/repluser");
     mkdir("$basedir/valgrind");
 
@@ -92,8 +97,8 @@ expunge_mode: $em
 delete_mode: $dm
 debug: 1
 internaldate_heuristic: receivedheader
-fulldirhash: 1
-hashimapspool: 1
+fulldirhash: 0
+hashimapspool: 0
 rfc3028_strict: 0
 sievenotifier: mailto
 sieve_extensions: fileinto reject vacation imapflags notify envelope body relational regex subaddress copy
@@ -205,6 +210,11 @@ my $admin = Mail::IMAPTalk->new(
 );
 
 
+$admin->create(_f('user/user01'));
+$admin->create(_f('user/user02'));
+$admin->create(_f('user/user03'));
+$admin->create(_f('user/user04'));
+$admin->create(_f('user/user05'));
 $admin->create(_f('user/foo'));
 $admin->create(_f('user/foo/subdir'));
 $admin->create(_f('user/foo/Sent Items'));

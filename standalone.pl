@@ -65,8 +65,8 @@ my %ip = (
 
 foreach my $type (sort keys %ip) {
     my @others = grep { $_ ne $type } sort keys %ip;
-    system qq[echo "replpass" | saslpasswd2 -c -p -utest_${type}_$$ repluser];
-    system("chown cyrus /etc/sasldb2");
+    #system qq[echo "replpass" | saslpasswd2 -c -p -utest_${type}_$$ repluser];
+    #system("chown cyrus /etc/sasldb2");
     my $basedir = "$rootdir-$type";
     system("find $basedir -type f -print0 | xargs -0 rm -f") if $del;
     mkdir($basedir);
@@ -181,6 +181,7 @@ __EOF
   lmtp          cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf -a" listen="$ip{$type}:2003"
   lmtplocal     cmd="$cyrusbase/bin/lmtpd -C $basedir/etc/imapd.conf" listen="$basedir/conf/socket/lmtp"
   fud           cmd="$cyrusbase/bin/fud -C $basedir/etc/imapd.conf" listen="$ip{$type}:4201" proto="udp"
+  syncserver    cmd="$cyrusbase/bin/sync_server -C $basedir/etc/imapd.conf -p 1" listen="$ip{$type}:2005"
 }
 
 EVENTS {
